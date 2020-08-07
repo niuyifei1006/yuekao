@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper   
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"   
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.niuyifei.mapper.MeetMapper">
+	<select id="selAll" resultType="com.niuyifei.bean.Meet" parameterType="map">
+		select * from (SELECT m.*,t.tname,GROUP_CONCAT(s.sname) AS sname FROM meeting m 
+		LEFT JOIN type t ON m.tid=t.tid 
+		LEFT JOIN middle z ON m.mid=z.mid 
+		LEFT JOIN `server` s ON z.sid=s.sid 
+		GROUP BY m.mid) m
+		<where>
+			<if test="mname!=null">
+				mname like '%${mname}%' 
+			</if>
+			<if test="tname!=null">
+				and tname '%${tname}%' 
+			</if>
+			<if test="starttime!=null and starttime!=''">
+				and starttime >=#{starttime} 
+			</if>
+			<if test="endtime!=null and endtime!=''">
+				and endtime &lt;=#{endtime}
+			</if>
+		</where>
+	</select>
+	<select id="selType" resultType="com.niuyifei.bean.Type">
+		select * from type
+	</select>
+	<select id="selServer" resultType="com.niuyifei.bean.Server">
+		select * from server
+	</select>
+	<insert id="insertMeet" parameterType="com.niuyifei.bean.Meet" useGeneratedKeys="true" keyProperty="mid">
+		insert into meeting
+		(code,mname,tid,starttime,endtime,createtime) 
+		values
+		(#{code},#{mname},#{tid},#{starttime},#{endtime},now())
+	</insert>
+	<insert id="insertMiddle" parameterType="map">
+		insert into middle
+		(mid,sid) 
+		values
+		(#{mid},#{sid})
+	</insert>
+	<delete id="delMeet" parameterType="int">
+		delete from meeting where mid=#{mid}
+	</delete>
+	<delete id="delMiddle" parameterType="int">
+		delete from middle where mid=#{mid}
+	</delete>
+	<select id="selMeetById" resultType="com.niuyifei.bean.Meet" parameterType="int">
+		select * from meeting where mid=#{mid}
+	</select>
+	<update id="updateMeet" parameterType="com.niuyifei.bean.Meet">
+		update meeting set 
+		code=#{code},mname=#{mname},tid=#{tid},starttime=#{starttime},endtime=#{endtime},createtime=now() 
+		where mid=#{mid}
+	</update>
+</mapper>
